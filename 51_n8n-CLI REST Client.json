@@ -21,7 +21,7 @@
       "name": "Import Workflow",
       "type": "n8n-nodes-base.executeCommand",
       "position": [
-        540,
+        740,
         160
       ],
       "parameters": {
@@ -213,7 +213,7 @@
       "name": "Write Binary File2",
       "type": "n8n-nodes-base.writeBinaryFile",
       "position": [
-        340,
+        540,
         160
       ],
       "parameters": {
@@ -223,11 +223,24 @@
       "typeVersion": 1
     },
     {
+      "id": "d2fe59da-a071-48c2-b7cb-528ace9b5172",
+      "name": "Clean Workflow for Import",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        140,
+        160
+      ],
+      "parameters": {
+        "jsCode": "const workflows = $json.body;\n\nconst clean = workflows.map(wf => ({\n  id: wf.id,\n  name: wf.name,\n  nodes: wf.nodes,\n  connections: wf.connections,\n  active: wf.active,\n  settings: wf.settings,\n  staticData: wf.staticData,\n  tags: wf.tags,\n  pinData: wf.pinData,\n  versionId: wf.versionId,\n  meta: wf.meta,\n}));\n\nreturn [{ json: { ...$json, body: clean } }];\n"
+      },
+      "typeVersion": 2
+    },
+    {
       "id": "7d4536b5-e1d1-439b-b528-b40d76cd065e",
       "name": "Move Binary Data1",
       "type": "n8n-nodes-base.moveBinaryData",
       "position": [
-        140,
+        340,
         160
       ],
       "parameters": {
@@ -252,6 +265,17 @@
       ]
     },
     "import-workflow": {
+      "main": [
+        [
+          {
+            "node": "Clean Workflow for Import",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clean Workflow for Import": {
       "main": [
         [
           {
