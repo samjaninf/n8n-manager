@@ -61,6 +61,29 @@ const getWfFromFile = (file: string): IWorkflow => {
   return JSON.parse(content);
 };
 
+/**
+ * Fields accepted by `n8n import:workflow`. Everything else (createdAt,
+ * updatedAt, triggerCount, ...) is owned by the n8n database: since n8n 1.x
+ * these are written straight into the workflow record and the import fails.
+ */
+const IMPORTABLE_FIELDS = [
+  'id',
+  'name',
+  'nodes',
+  'connections',
+  'active',
+  'settings',
+  'staticData',
+  'tags',
+  'pinData',
+  'versionId',
+  'meta',
+];
+
+const toImportable = (wf: IWorkflow): IWorkflow => Object.fromEntries(
+  Object.entries(wf).filter(([key]) => IMPORTABLE_FIELDS.includes(key))
+) as IWorkflow;
+
 const areWfsEqual = (a: IWorkflow, b: IWorkflow): boolean => {
   const x = { ...a }
   const y = { ...b }
@@ -164,7 +187,7 @@ export class Workflows {
     if (wfs.length > 0) {
       const outputIdsList = sortIds(wfs.map(i => i.id)).join();
       console.log(`Publishing [${outputIdsList}]`);
-      const res = await this.restCliClient.importWorkflow(wfs);
+      const res = await this.restCliClient.importWorkflow(wfs.map(toImportable));
       console.log(res.status, res.data);
     } else {
       console.log('There are no workflows to publish.');
